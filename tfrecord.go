@@ -177,7 +177,10 @@ func WriteCustomTFRecord(recordFilePath, labelMapPath string, data []AnnotatedFi
 	}
 
 	if shardFile != nil {
-		shardFile.Close()
+		err = shardFile.Close()
+		if err != nil {
+			return err
+		}
 	}
 
 	return saveTFRecordLabelMap(labelMapPath, tfRecordLabelMap)
@@ -202,7 +205,7 @@ func writeTFRecordExample(w io.Writer, e *tensorflow.Example) error {
 }
 
 // saveTFRecordLabelMap converts the labelMap to prototxt format and writes it to path.
-func saveTFRecordLabelMap(path string, labelMap map[string]int32) error {
+func saveTFRecordLabelMap(path string, labelMap map[string]int32) (err error) {
 	// Copy the label map into the protobuf structure.
 	siLabelMap := &protos.StringIntLabelMap{}
 	siLabelMap.Item = make([]*protos.StringIntLabelMapItem, 0, len(labelMap))
@@ -218,7 +221,7 @@ func saveTFRecordLabelMap(path string, labelMap map[string]int32) error {
 	if err != nil {
 		return fmt.Errorf("failed to create the label map file %q: %v", path, err)
 	}
-	defer file.Close()
+	defer closeWithErrCheck(file, &err)
 
 	if err := proto.MarshalText(file, siLabelMap); err != nil {
 		return fmt.Errorf("failed to write the label map %q: %v", path, err)
@@ -232,12 +235,12 @@ func saveTFRecordLabelMap(path string, labelMap map[string]int32) error {
 //
 // If an error occurs because the file does not exist, then os.IsNotExist will return true for the
 // error.
-func loadTFRecordLabelMap(path string) (map[string]int32, int32, error) {
+func loadTFRecordLabelMap(path string) (labelMap map[string]int32, maxID int32, err error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, 0, err
 	}
-	defer file.Close()
+	defer closeWithErrCheck(file, &err)
 
 	text, err := ioutil.ReadAll(file)
 	if err != nil {
@@ -256,8 +259,7 @@ func loadTFRecordLabelMap(path string) (map[string]int32, int32, error) {
 		return b
 	}
 
-	labelMap := make(map[string]int32, len(siLabelMap.Item))
-	var maxID int32
+	labelMap = make(map[string]int32, len(siLabelMap.Item))
 	for _, item := range siLabelMap.Item {
 		k, v := item.GetName(), item.GetId()
 		if k == "" || v <= 0 {

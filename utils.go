@@ -13,7 +13,7 @@ import (
 
 // filesByExtInDir retuns all regular files with file extension ext found directly in directory
 // dirPath. All files are returned if extension is empty.
-func filesByExtInDir(dirPath, ext string) ([]string, error) {
+func filesByExtInDir(dirPath, ext string) (files []string, err error) {
 	// Open the directory.
 	dirInfo, err := os.Stat(dirPath)
 	if err != nil || !dirInfo.IsDir() {
@@ -23,7 +23,7 @@ func filesByExtInDir(dirPath, ext string) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to access %q: %v", dirPath, err)
 	}
-	defer dir.Close()
+	defer closeWithErrCheck(dir, &err)
 
 	pathWithSep := dirPath
 	if !strings.HasSuffix(dirPath, string(os.PathSeparator)) {
@@ -31,7 +31,7 @@ func filesByExtInDir(dirPath, ext string) ([]string, error) {
 	}
 
 	// Iterate over all files in dir.
-	files := make([]string, 0, 100)
+	files = make([]string, 0, 100)
 	var fileList []os.FileInfo
 	for fileList, err = dir.Readdir(100); len(fileList) > 0; fileList, err = dir.Readdir(100) {
 		for _, file := range fileList {
@@ -138,15 +138,14 @@ func parseLabelsWithOneToOneImages(labelDir, labelFileExt, imageDir string, pars
 }
 
 // readLines returns a slice of lines read from the file at path.
-func readLines(path string) ([]string, error) {
+func readLines(path string) (lines []string, err error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("cannot read file %q: %v", path, err)
 	}
-	defer file.Close()
+	defer closeWithErrCheck(file, &err)
 
 	scanner := bufio.NewScanner(file)
-	var lines []string
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
@@ -158,17 +157,26 @@ func readLines(path string) ([]string, error) {
 }
 
 // readFile uses ioutil.ReadAll to read the file at path.
-func readFile(path string) ([]byte, error) {
+func readFile(path string) (data []byte, err error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer closeWithErrCheck(f, &err)
 
-	data, err := ioutil.ReadAll(f)
+	data, err = ioutil.ReadAll(f)
 	if err != nil {
 		return nil, err
 	}
 
 	return data, nil
+}
+
+// closeWithErrCheck calls c.Close(). If it returns an error, and (*e == nil), e is set to that
+// error.
+func closeWithErrCheck(c io.Closer, e *error) {
+	err := c.Close()
+	if err != nil && *e == nil {
+		*e = err
+	}
 }

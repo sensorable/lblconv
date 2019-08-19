@@ -64,13 +64,13 @@ func resizeImage(img image.Image, longerSide, shorterSide int,
 
 // decodeImageConfig opens the file at path and returns the results of image.DecodeConfig.
 func decodeImageConfig(path string) (config image.Config, format string, err error) {
-	file, err := os.Open(path)
+	f, err := os.Open(path)
 	if err != nil {
 		return image.Config{}, "", err
 	}
-	defer file.Close()
+	defer closeWithErrCheck(f, &err)
 
-	return image.DecodeConfig(file)
+	return image.DecodeConfig(f)
 }
 
 // loadImage reads and decodes the image at path and returns the results of image.Decode.
@@ -79,18 +79,18 @@ func loadImage(path string) (img image.Image, format string, err error) {
 	if err != nil {
 		return nil, "", err
 	}
-	defer f.Close()
+	defer closeWithErrCheck(f, &err)
 
 	return image.Decode(f)
 }
 
 // Saves the image to path, encoding it as PNG or JPG, depending on the file extension of path.
-func saveImage(path string, img image.Image, jpegQuality int) error {
+func saveImage(path string, img image.Image, jpegQuality int) (err error) {
 	f, err := os.Create(path)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer closeWithErrCheck(f, &err)
 
 	switch strings.ToLower(filepath.Ext(path)) {
 	case ".png":
