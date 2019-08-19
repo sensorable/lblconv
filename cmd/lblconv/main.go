@@ -84,18 +84,29 @@ func formatFrom(s string) format {
 
 func init() {
 	flag.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stderr, "Usage of %s:\n", filepath.Base(os.Args[0]))
-		_, _ = fmt.Fprintln(os.Stderr, "  aws-dl input options:\t\t-labels <dir> -images <dir>")
-		_, _ = fmt.Fprintln(os.Stderr, "  aws-dt input options:\t\t-labels <dir> -images <dir>")
-		_, _ = fmt.Fprintln(os.Stderr, "  kitti input options:\t\t-labels <dir> -images <dir>")
-		_, _ = fmt.Fprintln(os.Stderr, "  kitti output options:\t\t-labels-out <dir>")
-		_, _ = fmt.Fprintln(os.Stderr, "  sloth input options:\t\t-labels <file>")
-		_, _ = fmt.Fprintln(os.Stderr, "  sloth output options:\t\t-labels-out <file>")
-		_, _ = fmt.Fprintln(os.Stderr, "  tfrecord output options:\t-labels-out <file>"+
-				" -tfrecord-label-map-file [-num-shards]")
-		_, _ = fmt.Fprintln(os.Stderr, "  via input options:\t\t-labels <file>")
-		_, _ = fmt.Fprintln(os.Stderr, "  via output options:\t\t-labels-out <file>")
+		_, _ = fmt.Fprintf(os.Stderr, "Usage: %s -from <format> -to <format> [<arg> ...]\n",
+			filepath.Base(os.Args[0]))
 		_, _ = fmt.Fprintln(os.Stderr)
+		_, _ = fmt.Fprintln(os.Stderr, "The supported input (-from) and output (-to) formats and their"+
+				" required arguments:")
+		_, _ = fmt.Fprintln(os.Stderr, "  AWS Rekognition detect-labels:")
+		_, _ = fmt.Fprintln(os.Stderr, "    -from aws-dl -labels <dir> -images <dir>")
+		_, _ = fmt.Fprintln(os.Stderr, "  AWS Rekognition detect-text:")
+		_, _ = fmt.Fprintln(os.Stderr, "    -from aws-dt -labels <dir> -images <dir>")
+		_, _ = fmt.Fprintln(os.Stderr, "  KITTI 2D object detection:")
+		_, _ = fmt.Fprintln(os.Stderr, "    -from kitti -labels <dir> -images <dir>")
+		_, _ = fmt.Fprintln(os.Stderr, "    -to kitti -labels-out <dir>")
+		_, _ = fmt.Fprintln(os.Stderr, "  Sloth:")
+		_, _ = fmt.Fprintln(os.Stderr, "    -from sloth -labels <file>")
+		_, _ = fmt.Fprintln(os.Stderr, "    -to sloth -labels-out <file>")
+		_, _ = fmt.Fprintln(os.Stderr, "  TensorFlow TFRecord:")
+		_, _ = fmt.Fprintln(os.Stderr, "    -to tfrecord -labels-out <file>"+
+				" -tfrecord-label-map-file <file> [-num-shards <int>]")
+		_, _ = fmt.Fprintln(os.Stderr, "  VGG Image Annotator (VIA):")
+		_, _ = fmt.Fprintln(os.Stderr, "    -from via -labels <file>")
+		_, _ = fmt.Fprintln(os.Stderr, "    -to via -labels-out <file>")
+		_, _ = fmt.Fprintln(os.Stderr)
+		_, _ = fmt.Fprintln(os.Stderr, "Arguments:")
 		flag.PrintDefaults()
 	}
 
