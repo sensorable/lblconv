@@ -23,7 +23,7 @@ With [Go (Golang)](https://golang.org) installed on your machine, run the follow
 download, build and install the tool:
 
 ```
-go get -u github.com/sensorable/lblconv
+go get -u github.com/sensorable/lblconv/cmd/lblconv
 ```
 
 ### Usage
