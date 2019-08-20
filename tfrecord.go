@@ -11,10 +11,10 @@ import (
 	"os"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/ryszard/tfutils/go/example"
-	"github.com/ryszard/tfutils/go/tfrecord"
-	"github.com/ryszard/tfutils/proto/tensorflow/core/example" // package tensorflow
 	protos "github.com/sensorable/lblconv/protos"
+	"github.com/sensorable/lblconv/third-party/github.com/ryszard/tfutils/go/example"
+	"github.com/sensorable/lblconv/third-party/github.com/ryszard/tfutils/go/tfrecord"
+	tensorflow "github.com/sensorable/lblconv/third-party/github.com/ryszard/tfutils/proto/tensorflow/core/example"
 )
 
 // TFFeatureMap maps feature names to their values. Values must be convertible to
